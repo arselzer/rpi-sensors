@@ -4,6 +4,14 @@
 
 #define DHTPIN 21
 
+/*
+
+  GND  5V GPIO5
+   |   |   |
+  -----------
+   upper side (blue thing)
+*/
+
 int main (void) {
   wiringPiSetup();
 
@@ -14,8 +22,8 @@ int main (void) {
       printf("temperature: %.1f °C, humidity %.1f %\n", data[0], data[1]);
     }
 
-		delay(1000);
-    // 1s is the max sampling rate
+		delay(200);
+    // 1s is the max sampling rate, but it fails quite often
 	}
 
 	return 0 ;

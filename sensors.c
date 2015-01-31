@@ -75,3 +75,57 @@ float *read_dht11(int pin) {
     return NULL;
 	}
 }
+
+/*
+ *  Adapted from Sunfounder Sensor Kit
+ *  Might or might not work well. Can't be sure because I think my ADC broke.
+ *  python version that seems much simpler: http://heinrichhartmann.com/2014/12/14/Sensor-Monitoring-with-RaspberryPi-and-Circonus.html
+ */
+
+unsigned char read_adc0832(int adc_cs, int adc_clk, int adc_dio) {
+  pinMode(adc_cs, OUTPUT);
+  pinMode(adc_clk, OUTPUT);
+  pinMode(adc_dio, OUTPUT);
+
+	digitalWrite(adc_cs, 0);
+	digitalWrite(adc_clk,0);
+	digitalWrite(adc_dio,1);	delayMicroseconds(2);
+	digitalWrite(adc_clk,1);	delayMicroseconds(2);
+
+	digitalWrite(adc_clk,0);	
+	
+  digitalWrite(adc_dio,1);  delayMicroseconds(2);
+	digitalWrite(adc_clk,1);  delayMicroseconds(2);
+	digitalWrite(adc_clk,0);	
+
+	digitalWrite(adc_dio,0);  delayMicroseconds(2);
+	digitalWrite(adc_clk,1);	
+
+	digitalWrite(adc_dio,1);  delayMicroseconds(2);
+	digitalWrite(adc_clk,0);	
+
+	digitalWrite(adc_dio,1);  delayMicroseconds(2);
+
+  unsigned char dat1 = 0, dat2 = 0;
+
+	for(int i = 0; i < 8; i++) {
+		digitalWrite(adc_clk,1); delayMicroseconds(2);
+		digitalWrite(adc_clk,0); delayMicroseconds(2);
+
+		pinMode(adc_dio, INPUT);
+		dat1 = dat1 << 1 | digitalRead(adc_dio);
+	}
+	
+	for(int i = 0; i < 8; i++) {
+		dat2 = dat2 | ((unsigned char) digitalRead(adc_dio) << i);
+
+		digitalWrite(adc_clk,1); 	delayMicroseconds(2);
+		digitalWrite(adc_clk,0);  delayMicroseconds(2);
+	}
+
+  // reset
+	digitalWrite(adc_cs,1);
+	
+	return (dat1 == dat2) ? dat1 : 0;
+}
+
