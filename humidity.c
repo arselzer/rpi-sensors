@@ -7,14 +7,13 @@
 
 #define DHTPIN 21
 
-void read_dht11_dat(int pin) {
+float *read_dht11(int pin) {
 	uint8_t laststate = HIGH;
-	uint8_t counter = 0;
-	uint8_t j = 0, i;
-	float f;
+	uint8_t j = 0;
 
-	// dht11_dat[0] = dht11_dat[1] = dht11_dat[2] = dht11_dat[3] = dht11_dat[4] = 0;
   int dht11_dat[5] = {0,0,0,0,0};
+
+  /* initialize the sensors */
 
 	// pull pin down for 18 milliseconds
 	pinMode(pin, OUTPUT);
@@ -24,11 +23,13 @@ void read_dht11_dat(int pin) {
   // then pull it up for 40 microseconds
 	digitalWrite(pin, HIGH);
 	delayMicroseconds(40); 
-	// prepare to read the pin
-	pinMode(pin, INPUT);
+	
+  pinMode(pin, INPUT);
+
+	uint8_t counter = 0;
 
 	// detect change and read data
-	for ( i=0; i< MAXTIMINGS; i++) {
+	for (int i = 0; i < MAXTIMINGS; i++) {
 		counter = 0;
 		while (digitalRead(pin) == laststate) {
 			counter++;
@@ -52,16 +53,17 @@ void read_dht11_dat(int pin) {
 	}
 
 	// check we read 40 bits (8bit x 5 ) + verify checksum in the last byte
-	// print it out if data is good
-	if ((j >= 40) && 
-			(dht11_dat[4] == ((dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF)) ) {
-		f = dht11_dat[2] * 9. / 5. + 32;
-		printf("Humidity = %d.%d %% Temperature = %d.%d *C (%.1f *F)\n", 
-				dht11_dat[0], dht11_dat[1], dht11_dat[2], dht11_dat[3], f);
+	if ((j >= 40) && (dht11_dat[4] == ((dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF)) ) {
+    float humidity = dht11_dat[0] + dht11_dat[1] * 0.1;
+    float temperature = dht11_dat[2] + dht11_dat[3] * 0.1;
+
+    float data[] = {humidity, temperature};
+    return &data;
 	}
 	else
 	{
-		printf("Data not good, skip\n");
+		//printf("Data not good, skip\n");
+    return NULL;
 	}
 }
 
@@ -69,7 +71,15 @@ int main (void) {
   wiringPiSetup();
 
 	while (1)  {
-		read_dht11_dat(DHTPIN);
+		float *data = read_dht11(DHTPIN);
+
+    if (data != NULL) {
+      printf("temperature: %.1f °C, humidity %.1f %\n", data[0], data[1]);
+    }
+    //else {
+    //  printf(":/\n");
+    //}
+
 		delay(200);
 	}
 
