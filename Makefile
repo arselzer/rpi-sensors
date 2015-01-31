@@ -1,9 +1,2 @@
-.PHONY: all humidity
-
-all: humidity hall
-
-humidity:
-	gcc -std=c99 -lwiringPi humidity.c -o humidity
-
-hall:
-	gcc -std=c99 -lwiringPi hall.c -o hall
+all:
+	gcc -std=c99 -lwiringPi main.c sensors.c -o log

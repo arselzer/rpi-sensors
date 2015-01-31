@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MAXTIMINGS 85
+#include "sensors.h"
 
-#define DHTPIN 21
+#define MAXTIMINGS 85
 
 /*
  *  Adapted from Sunfounder Sensor Kit
@@ -74,20 +74,4 @@ float *read_dht11(int pin) {
 	else {
     return NULL;
 	}
-}
-
-int main (void) {
-  wiringPiSetup();
-
-	while (1)  {
-    float *data = read_dht11(DHTPIN);
-
-    if (data != NULL) {
-      printf("temperature: %.1f °C, humidity %.1f %\n", data[0], data[1]);
-    }
-
-		delay(200);
-	}
-
-	return 0 ;
 }
